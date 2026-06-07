@@ -3395,6 +3395,9 @@ class HoraeManager {
             else if (/^(职业|job|class|职务|身份)$/i.test(key)) info.job = value;
             else if (/^(生日|birthday|birth)$/i.test(key)) info.birthday = value;
             else if (/^(补充|note|备注|其他)$/i.test(key)) info.note = value;
+            else if (/^(做爱次数|sex_count)$/i.test(key)) info.sex_count = value;
+            else if (/^(目标|goals)$/i.test(key)) info.goals = value;
+            else if (/^(剧情梗概|plot_summary|梗概)$/i.test(key)) info.plot_summary = value;
         }
 
         // 2. 解析主体
