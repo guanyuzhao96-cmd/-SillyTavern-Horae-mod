@@ -1569,7 +1569,7 @@ class HoraeManager {
         const parseSource = String(message || '')
             .replace(/<think(?:ing)?[\s>][\s\S]*?<\/think(?:ing)?>/gi, '');
         const allHoraeMatches = [...parseSource.matchAll(/<horae>([\s\S]*?)<\/horae>/gi)];
-        const horaeFieldPattern = /^(time|timestamp|location|atmosphere|scene_desc|characters|costume|item[!]*|item-|event|affection|npc|agenda|agenda-|hold|hold-|rel|mood):/m;
+        const horaeFieldPattern = /^(time|timestamp|location|atmosphere|scene_desc|characters|costume|item[!]*|item-|event|affection|npc|harem|agenda|agenda-|hold|hold-|rel|mood):/m;
         if (allHoraeMatches.length > 1) {
             match = [...allHoraeMatches].reverse().find(m => horaeFieldPattern.test(m[1]))
                 || allHoraeMatches[allHoraeMatches.length - 1];
@@ -1606,6 +1606,7 @@ class HoraeManager {
             deletedAgenda: [],
             mood: {},
             relationships: [],
+            harem: {},
         };
 
         for (const line of lines) {
@@ -1759,6 +1760,16 @@ class HoraeManager {
                         npcInfo.first_seen = new Date().toISOString();
                     }
                     result.npcs[name] = npcInfo;
+                }
+            }
+            // harem:名~字段:值~字段:值...
+            else if (trimmedLine.startsWith('harem:')) {
+                const haremStr = trimmedLine.substring(6).trim();
+                const info = this._parseHaremFields(haremStr);
+                const hName = info._name;
+                delete info._name;
+                if (hName) {
+                    result.harem[hName] = info;
                 }
             }
             // agenda-:已完成待办内容 / agenda:订立日期|内容
@@ -1922,6 +1933,11 @@ class HoraeManager {
 
         if (parsed.npcs) {
             Object.assign(meta.npcs, parsed.npcs);
+        }
+
+        if (parsed.harem && Object.keys(parsed.harem).length > 0) {
+            if (!meta.harem) meta.harem = {};
+            Object.assign(meta.harem, parsed.harem);
         }
 
         // 追加AI写入的待办（跳过用户已手动删除的）
@@ -3455,6 +3471,51 @@ class HoraeManager {
         }
 
         info._name = name;
+        return info;
+    }
+
+    /**
+     * 解析后宫字段
+     * 格式: 名~字段:值~字段:值...
+     */
+    _parseHaremFields(haremStr) {
+        const info = {};
+        if (!haremStr) return { _name: '' };
+
+        const parts = haremStr.split('~');
+        info._name = parts[0].trim();
+
+        for (let i = 1; i < parts.length; i++) {
+            const kv = parts[i].trim();
+            if (!kv) continue;
+            const colonIdx = kv.indexOf(':');
+            if (colonIdx <= 0) continue;
+            const key = kv.substring(0, colonIdx).trim();
+            const value = kv.substring(colonIdx + 1).trim();
+            if (!value) continue;
+
+            // 字段匹配
+            if (/^(姓名|name)$/i.test(key)) info._name = value;
+            else if (/^(头像|avatar)$/i.test(key)) info.avatar = value;
+            else if (/^(年龄|age)$/i.test(key)) info.age = value;
+            else if (/^(身高|height)$/i.test(key)) info.height = value;
+            else if (/^(三围|measurements)$/i.test(key)) info.measurements = value;
+            else if (/^(罩杯|cup)$/i.test(key)) info.cup = value;
+            else if (/^(性格|personality)$/i.test(key)) info.personality = value;
+            else if (/^(职业|job)$/i.test(key)) info.job = value;
+            else if (/^(关系|relation)$/i.test(key)) info.relation = value;
+            else if (/^(排名|rank)$/i.test(key)) info.rank = value;
+            else if (/^(外貌|appearance)$/i.test(key)) info.appearance = value;
+            else if (/^(性癖|kink)$/i.test(key)) info.kink = value;
+            else if (/^(喜好|likes)$/i.test(key)) info.likes = value;
+            else if (/^(社交|social)$/i.test(key)) info.social = value;
+            else if (/^(独占|exclusive)$/i.test(key)) info.exclusive = value;
+            else if (/^(阶段|stage)$/i.test(key)) info.stage = value;
+            else if (/^(第一次|first_time)$/i.test(key)) info.first_time = value;
+            else if (/^(体位|positions)$/i.test(key)) info.positions = value;
+            else if (/^(NTR|ntr)$/i.test(key)) info.ntr = value;
+            else if (/^(备注|note)$/i.test(key)) info.note = value;
+        }
         return info;
     }
 

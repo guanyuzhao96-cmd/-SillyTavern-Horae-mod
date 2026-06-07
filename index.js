@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.0B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.1B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.16.0B';
+const VERSION = '1.16.1B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -20419,6 +20419,18 @@ function _buildAnalysisContext(state, targetIndex, userName) {
     const mood = Object.entries(state?.mood || {}).filter(([name]) => present.includes(name)).slice(0, 12);
     if (mood.length > 0) {
         lines.push(`- mood: ${mood.map(([name, val]) => `${name}:${val}`).join('；')}`);
+    }
+
+    const haremEntries = Object.entries(state?.harem || {}).slice(0, 20);
+    if (haremEntries.length > 0) {
+        const haremText = haremEntries.map(([name, info]) => {
+            const parts = [name];
+            if (info.stage) parts.push(`阶段:${info.stage}`);
+            if (info.relation) parts.push(`关系:${info.relation}`);
+            if (info.age) parts.push(`年龄:${info.age}`);
+            return parts.join('/');
+        }).join('；');
+        lines.push(`- harem: ${haremText}`);
     }
 
     return lines.join('\n');

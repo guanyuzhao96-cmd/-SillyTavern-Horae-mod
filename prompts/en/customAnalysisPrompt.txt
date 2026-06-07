@@ -22,6 +22,7 @@ item!!:emoji item name(quantity)|description=holder@exact location (key items, d
 item-:item name (consumed/lost items)
 affection:character name=affection value (only NPC affection toward {{user}}, do not record {{user}} themselves, do not append notes after the number)
 npc:character name|appearance=personality@relationship with {{user}}~gender:male or female~age:number~race:race name~occupation:occupation name~sex_count:number~goals:value~plot_summary:value
+harem:name~stage:value~relation:value~age:value~height:value~measurements:value~cup:value~personality:value~job:value~rank:value~appearance:value~kink:value~likes:value~social:value~exclusive:value~first_time:value~positions:value~NTR:value~note:value (update harem character fields when status changes; skip if unchanged)
 hold:type|date and time established|content (type must be either "plan" or "suspense". [MUST CHECK REFERENCE STATE] Write only when a truly new ledger entry appears that absolutely did not exist before. If a similar entry already exists in the reference state, duplicate creation is forbidden)
 hold-:full original text of an existing ledger entry from the reference state ([FORCED WRITE-OFF] When the text causes a referenced entry to meet its write-off condition, you must remove it with this command)
 </horae>
