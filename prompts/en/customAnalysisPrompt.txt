@@ -21,7 +21,7 @@ item!:emoji item name(quantity)|description=holder@exact location (important ite
 item!!:emoji item name(quantity)|description=holder@exact location (key items, description must be detailed)
 item-:item name (consumed/lost items)
 affection:character name=affection value (only NPC affection toward {{user}}, do not record {{user}} themselves, do not append notes after the number)
-npc:character name|appearance=personality@relationship with {{user}}~gender:male or female~age:number~race:race name~occupation:occupation name
+npc:character name|appearance=personality@relationship with {{user}}~gender:male or female~age:number~race:race name~occupation:occupation name~sex_count:number~goals:value~plot_summary:value
 hold:type|date and time established|content (type must be either "plan" or "suspense". [MUST CHECK REFERENCE STATE] Write only when a truly new ledger entry appears that absolutely did not exist before. If a similar entry already exists in the reference state, duplicate creation is forbidden)
 hold-:full original text of an existing ledger entry from the reference state ([FORCED WRITE-OFF] When the text causes a referenced entry to meet its write-off condition, you must remove it with this command)
 </horae>
@@ -56,7 +56,7 @@ event:importance level|event description
     ✦ Do not hallucinate item "restored"/"replenished"/"automatically appeared"
 
   [Format] New acquisitions should be written in full; existing items should write only the changed part. Do not write (1) for single items. Emoji prefix is mandatory.
-· NPC: first appearance must be complete (including ~gender/age/race/occupation). Afterward, write only changed fields; if unchanged, do not write.
+· NPC: first appearance must be complete (including ~gender/age/race/occupation/sex_count/goals/plot_summary). Afterward, write only changed fields; if unchanged, do not write.
   Delimiters: | separates name, = separates appearance and personality, @ separates relationship, ~ separates extended fields
 · Affection: first value is determined by relationship (stranger 0-20/acquaintance 30-50/friend 50-70), then write only when changed.
 · Suspense Ledger state transitions (critical; strictly follow the code-level logic below):

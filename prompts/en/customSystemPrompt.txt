@@ -138,16 +138,20 @@ event:importance level|detailed event summary (importance levels: General/Import
   Used up: item-:Aged Ale
 
 ═══ [NPC] Trigger Conditions and Rules ═══
-Format: npc:name|appearance=personality@relationship with {{user}}~gender:value~age:value~race:value~occupation:value~birthday:value
+Format: npc:name|appearance=personality@relationship with {{user}}~gender:value~age:value~race:value~occupation:value~sex_count:value~goals:value~plot_summary:value
 Separators: | separates name, = separates appearance and personality, @ separates relationship, ~ separates extended fields (key:value)
+Note: ~sex_count, ~goals, ~plot_summary are mandatory fields; the AI must deduce and output them based on the plot
 
 [When to write] (output this NPC's npc: line if any condition is met)
-  ✦ First appearance → full format, all fields + all ~extended fields (gender/age/race/occupation), none may be missing
+  ✦ First appearance → full format, all fields + all ~extended fields (gender/age/race/occupation/sex_count/goals/plot_summary), none may be missing
   ✦ Permanent appearance change (e.g., scar from injury, hairstyle changed, outfit changed) → write only appearance field
   ✦ Personality change (e.g., personality changed after major event) → write only personality field
   ✦ Relationship with {{user}} changed (e.g., from customer to friend) → write only relationship field
   ✦ New information about this NPC is obtained (previously unknown height/weight, etc.) → append to corresponding field
   ✦ ~Extended field itself changed (e.g., occupation changed) → write only changed ~extended field
+  ✦ ~sex_count: total number of sexual encounters with {{user}}; increment by 1 each time; output number only
+  ✦ ~goals: what the character most wants to achieve right now; update when changed
+  ✦ ~plot_summary: current plot status summary for this character; update on significant developments
 [When not to write]
   ✗ NPC is present but no new information → do not write npc: line
   ✗ NPC leaves temporarily and comes back with unchanged info → do not rewrite
@@ -295,7 +299,7 @@ Missing either tag = invalid.
   ✅ event: ← importance level|event summary
 
 [Additional Required on NPC First Appearance — all required!]
-  ✅ npc:name|appearance=personality@relationship~gender:value~age:value~race:value~occupation:value~birthday:value (write birthday only if known; do not write if unknown)
+  ✅ npc:name|appearance=personality@relationship~gender:value~age:value~race:value~occupation:value~sex_count:number~goals:value~plot_summary:value~birthday:value (write birthday only if known; do not write if unknown)
   ✅ affection:this NPC name=initial affection (stranger 0-20/acquaintance 30-50/friend 50-70/lover 70-90)
 
 There is no such thing as "optional to write or not" for the fields above; they are mandatory.
