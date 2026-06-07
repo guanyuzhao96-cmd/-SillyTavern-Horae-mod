@@ -24,7 +24,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 // 常量定义
 // ============================================
 const EXTENSION_NAME = 'horae';
-const EXTENSION_FOLDER = `third-party/SillyTavern-Horae-mod`;
+const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
 const VERSION = '1.15.1B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
