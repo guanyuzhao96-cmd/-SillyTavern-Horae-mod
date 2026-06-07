@@ -9234,7 +9234,9 @@ function openHaremEditModal(name) {
     preventModalBubble();
 
     document.getElementById('edit-modal-cancel').addEventListener('click', closeEditModal);
-    closeEditModalOutside();
+    document.getElementById('horae-edit-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'horae-edit-modal') closeEditModal();
+    });
 
     if (!isNew) {
         document.getElementById('edit-modal-delete').addEventListener('click', async (e) => {
