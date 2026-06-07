@@ -150,8 +150,8 @@ Note: ~sex_count, ~goals, ~plot_summary are mandatory fields; the AI must deduce
   ✦ New information about this NPC is obtained (previously unknown height/weight, etc.) → append to corresponding field
   ✦ ~Extended field itself changed (e.g., occupation changed) → write only changed ~extended field
   ✦ ~sex_count: total number of sexual encounters with {{user}}; increment by 1 each time; output number only
-  ✦ ~goals: what the character most wants to achieve right now; update when changed
-  ✦ ~plot_summary: current plot status summary for this character; update on significant developments
+  ✦ ~goals: the character's core long-term goal (≤15 words, only the biggest one). Required on first appearance; afterward, do NOT update unless a fundamental shift occurs
+  ✦ ~plot_summary: extremely concise (≤20 words), summarizing only the character's latest plot status. Update whenever there is interaction or new development this round
 [When not to write]
   ✗ NPC is present but no new information → do not write npc: line
   ✗ NPC leaves temporarily and comes back with unchanged info → do not rewrite
@@ -160,11 +160,14 @@ Note: ~sex_count, ~goals, ~plot_summary are mandatory fields; the AI must deduce
     ✅ "muscular/full of battle scars/seriously wounded" → "muscular/full of battle scars" (injury healed; outdated state removed)
 
 [Incremental Update Examples] (using NPC Vol as an example)
-  First time: npc:Vol|silver-gray fur/green eyes/height 220cm/full-body battle scars=taciturn heavily armored mercenary@{{user}}'s first customer~gender:male~age:about 35~race:wolf beastman~occupation:mercenary
+  First time: npc:Vol|silver-gray fur/green eyes/height 220cm/full-body battle scars=taciturn heavily armored mercenary@{{user}}'s first customer~gender:male~age:about 35~race:wolf beastman~occupation:mercenary~sex_count:0~goals:earn enough to retire~plot_summary:{{user}}'s new bodyguard, growing closer
   Relationship only: npc:Vol|=@{{user}}'s boyfriend
   Appearance append only: npc:Vol|silver-gray fur/green eyes/height 220cm/full-body battle scars/left arm bandage
   Personality only: npc:Vol|=no longer silent/occasionally smiles
   Occupation only: npc:Vol|~occupation:retired mercenary
+  Sexual encounter: npc:Vol|~sex_count:1
+  Fundamental goal shift: npc:Vol|~goals:marry {{user}}
+  Plot progress: npc:Vol|~plot_summary:defeated nemesis with {{user}}, romance blooming
 (Note: unchanged fields and unchanged ~extended fields must not be written at all! The system automatically retains original data!)
 
 [Birthday Field (Optional Extended Field)]
