@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.15.5B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.15.6B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.15.5B';
+const VERSION = '1.15.6B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -12531,6 +12531,9 @@ function buildHoraeTagFromMeta(meta) {
             if (info.race) extras.push(`种族:${info.race}`);
             if (info.job) extras.push(`职业:${info.job}`);
             if (info.birthday) extras.push(`生日:${info.birthday}`);
+            if (info.sex_count) extras.push(`做爱次数:${info.sex_count}`);
+            if (info.goals) extras.push(`目标:${info.goals}`);
+            if (info.plot_summary) extras.push(`剧情梗概:${info.plot_summary}`);
             if (info.note) extras.push(`补充:${info.note}`);
             if (extras.length > 0) npcLine += `~${extras.join('~')}`;
             lines.push(npcLine);
@@ -18255,8 +18258,8 @@ async function executeBatchScan(batches, options = {}) {
             let extraFormat = '';
             let extraRules = '';
             if (includeNpc) {
-                extraFormat += `\nnpc:角色名|外貌=性格@与${userName}的关系~性别:值~年龄:值~种族:值~职业:值（仅首次出场或信息变化时）`;
-                extraRules += `\n· NPC：首次出场完整记录（含~扩展字段），之后仅变化时写`;
+                extraFormat += `\nnpc:角色名|外貌=性格@与${userName}的关系~性别:值~年龄:值~种族:值~职业:值~做爱次数:数字~目标:值~剧情梗概:值（仅首次出场或信息变化时）`;
+                extraRules += `\n· NPC：首次出场完整记录（含~性别/年龄/种族/职业/做爱次数/目标/剧情梗概），之后仅变化时写`;
             }
             if (includeAffection) {
                 extraFormat += `\naffection:角色名=好感度数值（仅NPC对${userName}的好感，从文本中提取已有数值）`;

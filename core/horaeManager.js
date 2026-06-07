@@ -883,6 +883,9 @@ class HoraeManager {
                     if (info.race) extras.push(`${L('种族', 'race', '種族', '종족', 'раса')}:${info.race}`);
                     if (info.job) extras.push(`${L('职业', 'occupation', '職業', '직업', 'профессия')}:${info.job}`);
                     if (info.birthday) extras.push(`${L('生日', 'birthday', '誕生日', '생일', 'день рождения')}:${info.birthday}`);
+                    if (info.sex_count) extras.push(`${L('做爱次数', 'sex count', 'セックス回数', '성관계 횟수', 'секс счёт')}:${info.sex_count}`);
+                    if (info.goals) extras.push(`${L('目标', 'goals', '目標', '목표', 'цели')}:${info.goals}`);
+                    if (info.plot_summary) extras.push(`${L('剧情梗概', 'plot summary', 'あらすじ', '줄거리 요약', 'сюжет')}:${info.plot_summary}`);
                     if (info.note) extras.push(`${L('补充', 'notes', '備考', '비고', 'примечания')}:${info.note}`);
                     if (extras.length > 0) npcStr += `~${extras.join('~')}`;
                     lines.push(npcStr);
