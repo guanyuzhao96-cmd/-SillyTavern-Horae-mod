@@ -454,9 +454,7 @@ class HoraeManager {
                     state.mood[charName] = emotion;
                 }
             }
-        }
-
-            // 后宫：合并更新（不发给AI，仅本地）
+            // 后宫：合并更新（不发给AI，仅本地参考）
             if (meta.harem) {
                 for (const [name, data] of Object.entries(meta.harem)) {
                     if (data._deleted) {
@@ -468,7 +466,7 @@ class HoraeManager {
             }
         }
 
-        // 防回滚：过滤已标记删除的后宫条目
+        // 后宫：防回滚过滤已标记删除的条目
         const deletedHarem = chat[0]?.horae_meta?._deletedHarem;
         if (deletedHarem?.length) {
             for (const name of deletedHarem) {
