@@ -60,6 +60,23 @@ event:importance level|event description
 · NPC: first appearance must be complete (including ~gender/age/race/occupation/sex_count/goals/plot_summary). Afterward, write only changed fields; if unchanged, do not write.
   Delimiters: | separates name, = separates appearance and personality, @ separates relationship, ~ separates extended fields
 · Affection: first value is determined by relationship (stranger 0-20/acquaintance 30-50/friend 50-70), then write only when changed.
+· Harem: tracks female characters with emotional/romantic/sexual involvement with {{user}}.
+  [Who qualifies — any one condition met]
+    ✦ Direct sexual relationship with {{user}} (sex_count ≥ 1)
+    ✦ Currently in an ambiguous/dating/romantic relationship with {{user}}
+    ✦ {{user}} has explicitly expressed intent to pursue/court
+    ✦ Intimate physical contact (kissing, hugging beyond normal social interaction)
+  [Who does NOT qualify — strictly forbidden]
+    ✗ Regular friends/passersby/colleagues without romantic or sexual involvement
+    ✗ Characters who only had conversation without emotional development
+    ✗ Male characters (harem tracks females only)
+  [When to write harem: line]
+    ✦ New character first meets criteria → write full info (name + currently known fields)
+    ✦ Existing harem character has status change → only write changed ~fields
+    ✦ sex_count increases → update ~stage and ~first_time etc.
+  [When NOT to write]
+    ✗ Harem character has no status changes → do not write
+    ✗ Only appeared in conversation without emotional/physical progress → do not write
 · Suspense Ledger state transitions (critical; strictly follow the code-level logic below):
 
   The Suspense Ledger contains two types, and their rules are completely different:
