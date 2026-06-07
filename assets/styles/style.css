@@ -1245,6 +1245,16 @@
     border-radius: var(--horae-radius);
 }
 
+.horae-npc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-right: 6px;
+    border: 2px solid var(--horae-border);
+    flex-shrink: 0;
+}
+
 .horae-npc-name {
     font-weight: 600;
     color: var(--horae-accent);

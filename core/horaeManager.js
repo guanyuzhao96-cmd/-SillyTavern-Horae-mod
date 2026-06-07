@@ -400,7 +400,7 @@ class HoraeManager {
             if (meta.npcs) {
                 // 可更新字段 vs 受保护字段
                 const updatableFields = ['appearance', 'personality', 'relationship', 'age', 'job', 'note', 'sex_count', 'goals', 'plot_summary'];
-                const protectedFields = ['gender', 'race', 'birthday'];
+                const protectedFields = ['gender', 'race', 'birthday', 'avatar'];
                 for (const [name, newNpc] of Object.entries(meta.npcs)) {
                     const existing = state.npcs[name];
                     if (existing) {
@@ -430,6 +430,7 @@ class HoraeManager {
                             appearance: newNpc.appearance || '',
                             personality: newNpc.personality || '',
                             relationship: newNpc.relationship || '',
+                            avatar: newNpc.avatar || '',
                             gender: newNpc.gender || '',
                             age: newNpc.age || '',
                             race: newNpc.race || '',

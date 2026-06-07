@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.15.6B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.15.7B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.15.6B';
+const VERSION = '1.15.7B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -3655,6 +3655,7 @@ function updateCharactersDisplay() {
                             <div class="horae-npc-select-cb" style="display:${checkboxDisplay};align-items:center;margin-right:6px;">
                                 <input type="checkbox" ${isSelected ? 'checked' : ''}>
                             </div>
+                            ${info.avatar ? `<img class="horae-npc-avatar" src="${info.avatar}" onerror="this.style.display='none'" alt="${name}">` : ''}
                             <div class="horae-npc-name"><i class="${genderIcon} ${genderClass}"></i> ${name}</div>
                             <div class="horae-npc-actions">
                                 <button class="horae-item-edit-btn" data-edit-type="npc" data-edit-name="${name}" title="${t('common.edit')}" style="opacity:1;position:static;">
@@ -4482,6 +4483,10 @@ function openNpcAddModal() {
                         <label>${t('label.npcAliases')} <span style="font-weight:normal;color:var(--horae-text-dim);font-size:11px">${t('label.npcAliasesHint')}</span></label>
                         <input type="text" id="add-npc-aliases" placeholder="${t('placeholder.npcAliases')}">
                     </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcAvatar')} <span style="font-weight:normal;color:var(--horae-text-dim);font-size:11px">${t('label.npcAvatarHint')}</span></label>
+                        <input type="text" id="add-npc-avatar" placeholder="${t('placeholder.npcAvatar')}">
+                    </div>
                     <div class="horae-edit-field-row">
                         <div class="horae-edit-field horae-edit-field-compact">
                             <label>${t('label.npcGender')}</label>
@@ -4622,6 +4627,7 @@ function openNpcAddModal() {
 
         const genderSel = document.getElementById('add-npc-gender').value;
         const newData = {
+            avatar: document.getElementById('add-npc-avatar')?.value?.trim() || '',
             appearance: document.getElementById('add-npc-appearance').value,
             personality: document.getElementById('add-npc-personality').value,
             relationship: document.getElementById('add-npc-relationship').value,
@@ -4798,6 +4804,13 @@ function openNpcEditModal(npcName) {
                             ${t('ui.pinAsMainChar')}
                         </label>
                     </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcAvatar')} <span style="font-weight:normal;color:var(--horae-text-dim);font-size:11px">${t('label.npcAvatarHint')}</span></label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" id="edit-npc-avatar" value="${npc.avatar || ''}" placeholder="${t('placeholder.npcAvatar')}" style="flex:1;">
+                            ${npc.avatar ? `<img src="${npc.avatar}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" alt="">` : ''}
+                        </div>
+                    </div>
                     <div class="horae-edit-field-row">
                         <div class="horae-edit-field horae-edit-field-compact">
                             <label>${t('label.npcGender')}</label>
@@ -4898,6 +4911,7 @@ function openNpcEditModal(npcName) {
                 ? document.getElementById('edit-npc-gender-custom').value.trim()
                 : document.getElementById('edit-npc-gender').value,
             age: newAge,
+            avatar: document.getElementById('edit-npc-avatar').value.trim(),
             job: document.getElementById('edit-npc-job').value,
             sex_count: document.getElementById('edit-npc-sex-count').value,
             goals: document.getElementById('edit-npc-goals').value,
