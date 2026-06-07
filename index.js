@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.15.7B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.0B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.15.7B';
+const VERSION = '1.16.0B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -9105,6 +9105,208 @@ function _renderRpgHudFromSnapshot(messageEl, messageIndex, rpg) {
     }
 }
 
+// ============================================
+// 后宫面板
+// ============================================
+
+function renderHaremDisplay() {
+    const state = horaeManager.getLatestState();
+    const harem = state.harem || {};
+    const list = document.getElementById('horae-harem-list');
+    if (!list) return;
+
+    const entries = Object.entries(harem);
+    if (entries.length === 0) {
+        list.innerHTML = '<div class="horae-empty-hint">暂无后宫记录</div>';
+        return;
+    }
+
+    const stageOrder = ['陌生', '认识', '暧昧', '交往', '热恋', '订婚', '本垒', '已婚'];
+    const sorted = entries.sort((a, b) => {
+        const sa = stageOrder.indexOf(a[1].stage);
+        const sb = stageOrder.indexOf(b[1].stage);
+        return (sa === -1 ? 99 : sa) - (sb === -1 ? 99 : sb);
+    });
+
+    let html = '';
+    for (const [name, info] of sorted) {
+        html += '<div class="horae-harem-card">';
+        html += '<div class="horae-harem-header">';
+        if (info.avatar) {
+            html += `<img class="horae-harem-avatar" src="${escapeHtml(info.avatar)}" onerror="this.style.display='none'" alt="">`;
+        }
+        html += `<span class="horae-harem-name">${escapeHtml(name)}</span>`;
+        if (info.stage) html += `<span class="horae-harem-stage">${escapeHtml(info.stage)}</span>`;
+        if (info.exclusive) html += `<span class="horae-harem-badge" title="${escapeHtml(info.exclusive)}">${escapeHtml(info.exclusive)}</span>`;
+        html += '<div class="horae-harem-actions">';
+        html += `<button class="horae-icon-btn small" onclick="window._horaeEditHarem('${escapeHtml(name)}')" title="编辑"><i class="fa-solid fa-pen"></i></button>`;
+        html += `<button class="horae-icon-btn small danger" onclick="window._horaeDeleteHarem('${escapeHtml(name)}')" title="删除"><i class="fa-solid fa-trash"></i></button>`;
+        html += '</div></div>';
+
+        // Info grid
+        html += '<div class="horae-harem-grid">';
+        if (info.age) html += `<div><span class="horae-harem-label">年龄</span><span>${escapeHtml(info.age)}</span></div>`;
+        if (info.height) html += `<div><span class="horae-harem-label">身高</span><span>${escapeHtml(info.height)}</span></div>`;
+        if (info.measurements) html += `<div><span class="horae-harem-label">三围</span><span>${escapeHtml(info.measurements)}</span></div>`;
+        if (info.cup) html += `<div><span class="horae-harem-label">罩杯</span><span>${escapeHtml(info.cup)}</span></div>`;
+        if (info.personality) html += `<div><span class="horae-harem-label">性格</span><span>${escapeHtml(info.personality)}</span></div>`;
+        if (info.job) html += `<div><span class="horae-harem-label">职业</span><span>${escapeHtml(info.job)}</span></div>`;
+        if (info.relation) html += `<div><span class="horae-harem-label">关系</span><span>${escapeHtml(info.relation)}</span></div>`;
+        if (info.rank) html += `<div><span class="horae-harem-label">排名</span><span>${escapeHtml(info.rank)}</span></div>`;
+        if (info.appearance) html += `<div><span class="horae-harem-label">外貌</span><span>${escapeHtml(info.appearance)}</span></div>`;
+        if (info.kink) html += `<div><span class="horae-harem-label">性癖</span><span>${escapeHtml(info.kink)}</span></div>`;
+        if (info.likes) html += `<div><span class="horae-harem-label">喜好</span><span>${escapeHtml(info.likes)}</span></div>`;
+        if (info.social) html += `<div><span class="horae-harem-label">社交圈</span><span>${escapeHtml(info.social)}</span></div>`;
+        html += '</div>';
+
+        // Progress section
+        html += '<div class="horae-harem-progress">';
+        if (info.first_time) html += `<div><i class="fa-solid fa-calendar"></i> ${escapeHtml(info.first_time)}</div>`;
+        if (info.positions) html += `<div><i class="fa-solid fa-bed"></i> ${escapeHtml(info.positions)}</div>`;
+        html += '</div>';
+
+        // NTR section
+        if (info.ntr) html += `<div class="horae-harem-ntr"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(info.ntr)}</div>`;
+
+        // Note
+        if (info.note) html += `<div class="horae-harem-note">${escapeHtml(info.note)}</div>`;
+
+        html += '</div>';
+    }
+
+    list.innerHTML = html;
+}
+
+function openHaremEditModal(name) {
+    const state = horaeManager.getLatestState();
+    const info = name ? (state.harem?.[name] || {}) : {};
+    const isNew = !name;
+
+    const fields = [
+        ['name', '姓名', 'text', name || '', '如：林黛玉'],
+        ['avatar', '头像URL', 'text', info.avatar || '', 'https://...'],
+        ['age', '年龄', 'text', info.age || '', '如：18'],
+        ['height', '身高', 'text', info.height || '', '如：168cm'],
+        ['measurements', '三围', 'text', info.measurements || '', '如：88-60-90'],
+        ['cup', '罩杯', 'text', info.cup || '', '如：C'],
+        ['personality', '性格', 'text', info.personality || '', '如：傲娇、温柔'],
+        ['job', '专业/职业', 'text', info.job || '', '如：学生会会长'],
+        ['relation', '与我的关系', 'text', info.relation || '', '如：同班同学'],
+        ['rank', '校花/系花榜排名', 'text', info.rank || '', '如：系花第一'],
+        ['appearance', '外貌特征', 'text', info.appearance || '', '如：黑长直、蓝瞳'],
+        ['kink', '性癖/偏好', 'text', info.kink || '', '如：后入、口交'],
+        ['likes', '喜欢/讨厌', 'text', info.likes || '', '如：甜食、猫/烟味'],
+        ['social', '社交圈', 'text', info.social || '', '如：与A是闺蜜，讨厌B'],
+        ['exclusive', '独占/共享', 'text', info.exclusive || '', '如：独占/开放关系'],
+        ['stage', '攻略阶段', 'text', info.stage || '', '如：陌生→认识→暧昧→交往→本垒'],
+        ['first_time', '第一次时间/地点', 'text', info.first_time || '', '如：2026/03/15 酒店'],
+        ['positions', '解锁体位', 'text', info.positions || '', '如：传教士、后入、女上位'],
+        ['ntr', 'NTR/NTL信息', 'text', info.ntr || '', '如：男友是XX/追求者YY'],
+        ['note', '备注', 'textarea', info.note || '', '其他信息'],
+    ];
+
+    const fieldHtml = fields.map(([key, label, type, value, placeholder]) => {
+        const input = type === 'textarea'
+            ? `<textarea id="harem-edit-${key}" placeholder="${placeholder}">${escapeHtml(value)}</textarea>`
+            : `<input type="text" id="harem-edit-${key}" value="${escapeHtml(value)}" placeholder="${placeholder}">`;
+        return `<div class="horae-edit-field"><label>${label}</label>${input}</div>`;
+    }).join('');
+
+    const modalHtml = `
+        <div id="horae-edit-modal" class="horae-modal">
+            <div class="horae-modal-content">
+                <div class="horae-modal-header">
+                    <i class="fa-solid fa-heart"></i> ${isNew ? '添加后宫' : '编辑：' + name}
+                </div>
+                <div class="horae-modal-body horae-edit-modal-body" style="max-height:70vh;overflow-y:auto;">
+                    ${fieldHtml}
+                </div>
+                <div class="horae-modal-footer">
+                    ${!isNew ? '<button id="edit-modal-delete" class="horae-btn danger" style="background:#c62828;color:#fff;margin-right:auto;"><i class="fa-solid fa-trash"></i> 删除</button>' : ''}
+                    <button id="edit-modal-save" class="horae-btn primary"><i class="fa-solid fa-check"></i> 保存</button>
+                    <button id="edit-modal-cancel" class="horae-btn"><i class="fa-solid fa-xmark"></i> 取消</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    preventModalBubble();
+
+    document.getElementById('edit-modal-cancel').addEventListener('click', closeEditModal);
+    closeEditModalOutside();
+
+    if (!isNew) {
+        document.getElementById('edit-modal-delete').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm(`确定删除后宫条目「${name}」吗？`)) return;
+            const chat = horaeManager.getChat();
+            if (chat?.length) {
+                const meta = chat[chat.length - 1].horae_meta;
+                if (!meta.harem) meta.harem = {};
+                meta.harem[name] = { _deleted: true };
+                if (!chat[0].horae_meta) chat[0].horae_meta = createEmptyMeta();
+                if (!chat[0].horae_meta._deletedHarem) chat[0].horae_meta._deletedHarem = [];
+                chat[0].horae_meta._deletedHarem.push(name);
+                await getContext().saveChat();
+                closeEditModal();
+                renderHaremDisplay();
+            }
+        });
+    }
+
+    document.getElementById('edit-modal-save').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const newName = document.getElementById('harem-edit-name')?.value.trim();
+        if (!newName) return;
+
+        const data = {};
+        for (const [key] of fields) {
+            const el = document.getElementById(`harem-edit-${key}`);
+            if (el) data[key] = el.value.trim();
+        }
+
+        const chat = horaeManager.getChat();
+        if (!chat?.length) return;
+        const lastIdx = chat.length - 1;
+        if (!chat[lastIdx].horae_meta) chat[lastIdx].horae_meta = createEmptyMeta();
+        if (!chat[lastIdx].horae_meta.harem) chat[lastIdx].horae_meta.harem = {};
+
+        if (isNew) {
+            chat[lastIdx].horae_meta.harem[newName] = data;
+            delete data.name; // store name as key
+        } else if (newName !== name) {
+            chat[lastIdx].horae_meta.harem[name] = { _deleted: true };
+            chat[lastIdx].horae_meta.harem[newName] = data;
+            if (!chat[0].horae_meta) chat[0].horae_meta = createEmptyMeta();
+            if (!chat[0].horae_meta._deletedHarem) chat[0].horae_meta._deletedHarem = [];
+            chat[0].horae_meta._deletedHarem.push(name);
+        } else {
+            chat[lastIdx].horae_meta.harem[name] = data;
+        }
+
+        await getContext().saveChat();
+        closeEditModal();
+        renderHaremDisplay();
+    });
+}
+
+window._horaeEditHarem = (name) => openHaremEditModal(name);
+window._horaeDeleteHarem = async (name) => {
+    if (!confirm(`确定删除后宫条目「${name}」吗？`)) return;
+    const chat = horaeManager.getChat();
+    if (chat?.length) {
+        const meta = chat[chat.length - 1].horae_meta;
+        if (!meta?.harem) meta.harem = {};
+        meta.harem[name] = { _deleted: true };
+        if (!chat[0].horae_meta) chat[0].horae_meta = createEmptyMeta();
+        if (!chat[0].horae_meta._deletedHarem) chat[0].horae_meta._deletedHarem = [];
+        chat[0].horae_meta._deletedHarem.push(name);
+        await getContext().saveChat();
+        renderHaremDisplay();
+    }
+};
+
 /**
  * 刷新所有显示
  */
@@ -9118,6 +9320,7 @@ function refreshAllDisplays() {
     updateItemsDisplay();
     updateLocationMemoryDisplay();
     updateRpgDisplay();
+    renderHaremDisplay();
     updateTokenCounter();
 }
 
@@ -13281,6 +13484,7 @@ function initSettingsEvents() {
     $('#horae-btn-add-relationship').on('click', () => openRelationshipEditModal(null));
     $('#horae-btn-add-location').on('click', () => openLocationEditModal(null));
     $('#horae-btn-merge-locations').on('click', openLocationMergeModal);
+    $('#horae-btn-add-harem').on('click', () => openHaremEditModal(null));
 
     // RPG 属性条配置
     $(document).on('input', '.horae-rpg-config-key:not([data-type="attr"])', function () {

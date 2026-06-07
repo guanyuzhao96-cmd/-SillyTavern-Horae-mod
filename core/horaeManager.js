@@ -65,6 +65,7 @@ export function createEmptyMeta() {
         events: [],
         affection: {},
         npcs: {},
+        harem: {},
         agenda: [],
         deletedAgenda: [],
         mood: {},
@@ -452,6 +453,26 @@ class HoraeManager {
                 for (const [charName, emotion] of Object.entries(meta.mood)) {
                     state.mood[charName] = emotion;
                 }
+            }
+        }
+
+            // 后宫：合并更新（不发给AI，仅本地）
+            if (meta.harem) {
+                for (const [name, data] of Object.entries(meta.harem)) {
+                    if (data._deleted) {
+                        delete state.harem[name];
+                    } else {
+                        state.harem[name] = { ...state.harem[name], ...data };
+                    }
+                }
+            }
+        }
+
+        // 防回滚：过滤已标记删除的后宫条目
+        const deletedHarem = chat[0]?.horae_meta?._deletedHarem;
+        if (deletedHarem?.length) {
+            for (const name of deletedHarem) {
+                delete state.harem[name];
             }
         }
 
