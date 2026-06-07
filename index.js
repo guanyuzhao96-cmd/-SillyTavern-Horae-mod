@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.3B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.4B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.16.3B';
+const VERSION = '1.16.4B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -18497,8 +18497,8 @@ async function executeBatchScan(batches, options = {}) {
                 extraRules += `\n· 关系：仅在关系新建或变化时写，格式 rel:角色A>角色B=关系类型，备注可选`;
             }
             if (includeHarem) {
-                extraFormat += `\nharem:名字~字段:值~字段:值...（字段名：阶段/关系/年龄/身高/三围/罩杯/性格/职业/排名/外貌/性癖/喜好/社交/独占/第一次/体位/NTR/备注。仅变化时更新对应字段）`;
-                extraRules += `\n· 后宫：参考状态中的后宫角色，本回合状态变化时更新对应~字段`;
+                extraFormat += `\nharem:名字~字段:值...（字段名：阶段/关系/年龄/身高/三围/罩杯/性格/职业/排名/外貌/性癖/喜好/社交/独占/第一次/体位/NTR/备注。新角色首次加入尽可能写全字段，已有角色有新信息或状态变化时更新对应~字段。静态字段从世界书/角色设定提取，动态字段从剧情提取）`;
+                extraRules += `\n· 后宫：参考状态中的后宫角色，首次加入写全字段，变化时更新对应~字段，未知的字段禁止猜测`;
             }
 
             batchPrompt = `你是剧情分析助手。请逐条分析以下对话记录，为每条消息提取【${allowedTags}】。
