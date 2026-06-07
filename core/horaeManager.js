@@ -399,7 +399,7 @@ class HoraeManager {
             // NPC：逐字段合并，保留_id
             if (meta.npcs) {
                 // 可更新字段 vs 受保护字段
-                const updatableFields = ['appearance', 'personality', 'relationship', 'age', 'job', 'note'];
+                const updatableFields = ['appearance', 'personality', 'relationship', 'age', 'job', 'note', 'sex_count', 'goals', 'plot_summary'];
                 const protectedFields = ['gender', 'race', 'birthday'];
                 for (const [name, newNpc] of Object.entries(meta.npcs)) {
                     const existing = state.npcs[name];
@@ -435,6 +435,9 @@ class HoraeManager {
                             race: newNpc.race || '',
                             job: newNpc.job || '',
                             birthday: newNpc.birthday || '',
+                            sex_count: newNpc.sex_count || '',
+                            goals: newNpc.goals || '',
+                            plot_summary: newNpc.plot_summary || '',
                             note: newNpc.note || '',
                             _ageRefDate: newNpc.age ? (state.timestamp.story_date || '') : '',
                             first_seen: newNpc.first_seen || new Date().toISOString(),

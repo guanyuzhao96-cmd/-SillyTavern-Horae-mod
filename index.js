@@ -3596,7 +3596,7 @@ function updateCharactersDisplay() {
 
                 // 扩展信息行（年龄/种族/职业）
                 const extraTags = [];
-                if (info.race) extraTags.push(info.race);
+                // race removed
                 if (info.age) {
                     const ageResult = horaeManager.calcCurrentAge(info, state.timestamp?.story_date);
                     if (ageResult.changed) {
@@ -3609,9 +3609,16 @@ function updateCharactersDisplay() {
                 if (extraTags.length > 0) {
                     descHtml += `<span class="horae-npc-extras">${extraTags.join(' · ')}</span>`;
                 }
-                if (info.birthday) {
-                    descHtml += `<span class="horae-npc-birthday"><i class="fa-solid fa-cake-candles"></i>${info.birthday}</span>`;
-                }
+            // birthday removed
+            if (info.sex_count) {
+                descHtml += `<span class="horae-npc-sex-count"><i class="fa-solid fa-heart"></i> ${info.sex_count}</span>`;
+            }
+            if (info.goals) {
+                descHtml += `<span class="horae-npc-goals"><i class="fa-solid fa-bullseye"></i> ${info.goals}</span>`;
+            }
+            if (info.plot_summary) {
+                descHtml += `<span class="horae-npc-plot-summary"><i class="fa-solid fa-book-open"></i> ${info.plot_summary}</span>`;
+            }
                 if (info.note) {
                     descHtml += `<span class="horae-npc-note">${info.note}</span>`;
                 }
@@ -4498,6 +4505,22 @@ function openNpcAddModal() {
                         <label>${t('label.npcRelationship')}</label>
                         <input type="text" id="add-npc-relationship" placeholder="${t('placeholder.npcRelationship')}">
                     </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcSexCount')}</label>
+                        <input type="text" id="add-npc-sex-count" placeholder="${t('placeholder.npcSexCount')}">
+                    </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcGoals')}</label>
+                        <input type="text" id="add-npc-goals" placeholder="${t('placeholder.npcGoals')}">
+                    </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcPlotSummary')}</label>
+                        <textarea id="add-npc-plot-summary" placeholder="${t('placeholder.npcPlotSummary')}"></textarea>
+                    </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcNote')}</label>
+                        <input type="text" id="add-npc-note" placeholder="${t('placeholder.npcNote')}">
+                    </div>
                 </div>
                 <div class="horae-modal-footer">
                     <button id="add-modal-save" class="horae-btn primary">
@@ -4543,6 +4566,9 @@ function openNpcAddModal() {
             if (enriched.personality) document.getElementById('add-npc-personality').value = enriched.personality;
             if (enriched.relationship) document.getElementById('add-npc-relationship').value = enriched.relationship;
             if (enriched.age) document.getElementById('add-npc-age').value = enriched.age;
+            if (enriched.sex_count) document.getElementById('add-npc-sex-count').value = enriched.sex_count;
+            if (enriched.goals) document.getElementById('add-npc-goals').value = enriched.goals;
+            if (enriched.plot_summary) document.getElementById('add-npc-plot-summary').value = enriched.plot_summary;
             if (enriched.gender) {
                 const sel = document.getElementById('add-npc-gender');
                 if (['男', '女'].includes(enriched.gender)) {
@@ -4603,6 +4629,10 @@ function openNpcAddModal() {
                 ? document.getElementById('add-npc-gender-custom').value.trim()
                 : genderSel,
             age: document.getElementById('add-npc-age').value,
+            sex_count: document.getElementById('add-npc-sex-count')?.value || '',
+            goals: document.getElementById('add-npc-goals')?.value || '',
+            plot_summary: document.getElementById('add-npc-plot-summary')?.value || '',
+            note: document.getElementById('add-npc-note')?.value || '',
             first_seen: new Date().toISOString(),
             last_seen: new Date().toISOString(),
         };
@@ -4782,10 +4812,6 @@ function openNpcEditModal(npcName) {
                             <input type="text" id="edit-npc-age" value="${npc.age || ''}" placeholder="${t('placeholder.npcAge')}">
                         </div>
                         <div class="horae-edit-field horae-edit-field-compact">
-                            <label>${t('label.npcRace')}</label>
-                            <input type="text" id="edit-npc-race" value="${npc.race || ''}" placeholder="${t('placeholder.npcRace')}">
-                        </div>
-                        <div class="horae-edit-field horae-edit-field-compact">
                             <label>${t('label.npcJob')}</label>
                             <input type="text" id="edit-npc-job" value="${npc.job || ''}" placeholder="${t('placeholder.npcJob')}">
                         </div>
@@ -4803,8 +4829,16 @@ function openNpcEditModal(npcName) {
                         <input type="text" id="edit-npc-relationship" value="${npc.relationship || ''}" placeholder="${t('placeholder.npcRelationship')}">
                     </div>
                     <div class="horae-edit-field">
-                        <label>${t('label.npcBirthday')} <span style="font-weight:normal;color:var(--horae-text-dim);font-size:11px">${t('label.npcBirthdayHint')}</span></label>
-                        <input type="text" id="edit-npc-birthday" value="${npc.birthday || ''}" placeholder="${t('placeholder.npcBirthday')}">
+                        <label>${t('label.npcSexCount')}</label>
+                        <input type="text" id="edit-npc-sex-count" value="${npc.sex_count || ''}" placeholder="${t('placeholder.npcSexCount')}">
+                    </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcGoals')}</label>
+                        <input type="text" id="edit-npc-goals" value="${npc.goals || ''}" placeholder="${t('placeholder.npcGoals')}">
+                    </div>
+                    <div class="horae-edit-field">
+                        <label>${t('label.npcPlotSummary')}</label>
+                        <textarea id="edit-npc-plot-summary" placeholder="${t('placeholder.npcPlotSummary')}">${npc.plot_summary || ''}</textarea>
                     </div>
                     <div class="horae-edit-field">
                         <label>${t('label.npcNote')}</label>
@@ -4864,9 +4898,10 @@ function openNpcEditModal(npcName) {
                 ? document.getElementById('edit-npc-gender-custom').value.trim()
                 : document.getElementById('edit-npc-gender').value,
             age: newAge,
-            race: document.getElementById('edit-npc-race').value,
             job: document.getElementById('edit-npc-job').value,
-            birthday: document.getElementById('edit-npc-birthday').value.trim(),
+            sex_count: document.getElementById('edit-npc-sex-count').value,
+            goals: document.getElementById('edit-npc-goals').value,
+            plot_summary: document.getElementById('edit-npc-plot-summary').value,
             note: document.getElementById('edit-npc-note').value
         };
 
