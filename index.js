@@ -18,7 +18,7 @@ import { calculateRelativeTime, calculateDetailedRelativeTime, formatRelativeTim
 import { t, tForLang, initI18n, getLanguage, isZhLocale, setLanguage, detectEffectiveAiLangIsZh, detectEffectiveAiLang } from './core/i18n.js';
 import { initPromptDefaults, ensurePromptDefaults, getPromptDefaultSync } from './core/promptDefaults.js';
 import { installSaveRequestGzipFetchHook } from './utils/saveRequestGzip.js';
-import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.1B';
+import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.js?v=1.16.2B';
 
 // ============================================
 // 常量定义
@@ -26,7 +26,7 @@ import { mountMessagePanel as mountVueMessagePanel } from './dist/messagePanel.j
 const EXTENSION_NAME = 'horae';
 const EXTENSION_FOLDER = `third-party/-SillyTavern-Horae-mod`;
 const TEMPLATE_PATH = `${EXTENSION_FOLDER}/assets/templates`;
-const VERSION = '1.16.1B';
+const VERSION = '1.16.2B';
 const DEFAULT_VECTOR_STRIP_TAGS = 'dream_status,Episode,details,think,thinking,Thinking';
 const MESSAGE_PANEL_THEME_TYPE = 'horae-message-panel-theme';
 const MESSAGE_PANEL_THEME_DAY = 'day';
@@ -245,6 +245,7 @@ const DEFAULT_SETTINGS = {
     customHeadPrompt: '',        // 摘要/总结任务自定义头部提示词
     customTailPrompt: '',        // 摘要/总结任务自定义尾部提示词
     aiScanIncludeNpc: false,     // AI摘要是否提取NPC
+    aiScanIncludeHarem: false,   // AI摘要是否提取后宫
     aiScanIncludeAffection: false, // AI摘要是否提取好感度
     aiScanIncludeScene: false,    // AI摘要是否提取场景记忆
     aiScanIncludeRelationship: false, // AI摘要是否提取关系网络
@@ -14090,7 +14091,7 @@ function initSettingsEvents() {
         'sendTimeline', 'contextDepth', 'sendCharacters', 'sendCharacterAffection', 'sendMainCharacterPersonality', 'sendItems',
         'sendLocationMemory', 'sendRelationships', 'sendMood',
         'antiParaphraseMode', 'sideplayMode',
-        'aiScanIncludeNpc', 'aiScanIncludeAffection', 'aiScanIncludeScene', 'aiScanIncludeRelationship',
+        'aiScanIncludeNpc', 'aiScanIncludeHarem', 'aiScanIncludeAffection', 'aiScanIncludeScene', 'aiScanIncludeRelationship',
         'rpgMode', 'sendRpgBars', 'sendRpgSkills', 'sendRpgAttributes', 'sendRpgReputation',
         'sendRpgEquipment', 'sendRpgLevel', 'sendRpgCurrency', 'sendRpgStronghold', 'rpgDiceEnabled',
         'rpgBarsUserOnly', 'rpgSkillsUserOnly', 'rpgAttrsUserOnly', 'rpgReputationUserOnly',
@@ -18363,7 +18364,7 @@ async function batchAIScan() {
 
     const scanConfig = await showAIScanConfigDialog(targets.length);
     if (!scanConfig) return;
-    const { tokenLimit, includeNpc, includeAffection, includeScene, includeRelationship } = scanConfig;
+    const { tokenLimit, includeNpc, includeHarem, includeAffection, includeScene, includeRelationship } = scanConfig;
 
     const batches = [];
     let currentBatch = [], currentTokens = 0;
@@ -18382,17 +18383,17 @@ async function batchAIScan() {
     const skippedHint = skippedEmpty > 0 ? '\n· ' + t('toast.skippedEmpty', { n: skippedEmpty }) : '';
     if (!confirm(t('confirm.aiScanConfirm', { batches: batches.length, skippedHint }))) return;
 
-    const scanResults = await executeBatchScan(batches, { includeNpc, includeAffection, includeScene, includeRelationship });
+    const scanResults = await executeBatchScan(batches, { includeNpc, includeHarem, includeAffection, includeScene, includeRelationship });
     if (scanResults.length === 0) {
         showToast(t('toast.insufficientEvents'), 'warning');
         return;
     }
-    showScanReviewModal(scanResults, { includeNpc, includeAffection, includeScene, includeRelationship });
+    showScanReviewModal(scanResults, { includeNpc, includeHarem, includeAffection, includeScene, includeRelationship });
 }
 
 /** 执行批量扫描，每批完成后立即写入 chat 并保存（防止中途崩溃丢失已扫描数据） */
 async function executeBatchScan(batches, options = {}) {
-    const { includeNpc, includeAffection, includeScene, includeRelationship } = options;
+    const { includeNpc, includeHarem, includeAffection, includeScene, includeRelationship } = options;
     let cancelled = false;
     let cancelResolve = null;
     const cancelPromise = new Promise(resolve => { cancelResolve = resolve; });
@@ -18451,11 +18452,13 @@ async function executeBatchScan(batches, options = {}) {
     let allowedTags = 'time、item、event';
     let forbiddenNote = '禁止输出 agenda/costume/location/atmosphere/characters';
     if (!includeNpc) forbiddenNote += '/npc';
+    if (!includeHarem) forbiddenNote += '/harem';
     if (!includeAffection) forbiddenNote += '/affection';
     if (!includeScene) forbiddenNote += '/scene_desc';
     if (!includeRelationship) forbiddenNote += '/rel';
     forbiddenNote += ' 等其他标签';
     if (includeNpc) allowedTags += '、npc';
+    if (includeHarem) allowedTags += '、harem';
     if (includeAffection) allowedTags += '、affection';
     if (includeScene) allowedTags += '、scene_desc';
     if (includeRelationship) allowedTags += '、rel';
@@ -18492,6 +18495,10 @@ async function executeBatchScan(batches, options = {}) {
             if (includeRelationship) {
                 extraFormat += `\nrel:角色A>角色B=关系类型|备注（角色间关系发生变化时输出）`;
                 extraRules += `\n· 关系：仅在关系新建或变化时写，格式 rel:角色A>角色B=关系类型，备注可选`;
+            }
+            if (includeHarem) {
+                extraFormat += `\nharem:名字~字段:值~字段:值...（字段名：阶段/关系/年龄/身高/三围/罩杯/性格/职业/排名/外貌/性癖/喜好/社交/独占/第一次/体位/NTR/备注。仅变化时更新对应字段）`;
+                extraRules += `\n· 后宫：参考状态中的后宫角色，本回合状态变化时更新对应~字段`;
             }
 
             batchPrompt = `你是剧情分析助手。请逐条分析以下对话记录，为每条消息提取【${allowedTags}】。
@@ -18579,6 +18586,7 @@ event:重要程度|事件描述
                     parsed.deletedAgenda = [];
                     parsed.deletedItems = [];
                     if (!includeNpc) parsed.npcs = {};
+                    if (!includeHarem) parsed.harem = {};
                     if (!includeAffection) parsed.affection = {};
                     if (!includeRelationship) parsed.relationships = [];
 
@@ -19119,6 +19127,10 @@ function showAIScanConfigDialog(targetCount) {
                             ${t('ui.npcCharInfo')}
                         </label>
                         <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--horae-text); cursor: pointer;">
+                            <input type="checkbox" id="horae-scan-include-harem" ${settings.aiScanIncludeHarem ? 'checked' : ''}>
+                            ❤️ 后宫
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--horae-text); cursor: pointer;">
                             <input type="checkbox" id="horae-scan-include-affection" ${settings.aiScanIncludeAffection ? 'checked' : ''}>
                             ${t('characters.affection')}
                         </label>
@@ -19159,11 +19171,13 @@ function showAIScanConfigDialog(targetCount) {
         modal.querySelector('#horae-ai-scan-confirm').addEventListener('click', () => {
             const val = parseInt(modal.querySelector('#horae-ai-scan-token-limit').value) || 80000;
             const includeNpc = modal.querySelector('#horae-scan-include-npc').checked;
+            const includeHarem = modal.querySelector('#horae-scan-include-harem')?.checked || false;
             const includeAffection = modal.querySelector('#horae-scan-include-affection').checked;
             const includeScene = modal.querySelector('#horae-scan-include-scene').checked;
             const includeRelationship = modal.querySelector('#horae-scan-include-relationship').checked;
             const newStripTags = modal.querySelector('#horae-scan-strip-tags').value.trim();
             settings.aiScanIncludeNpc = includeNpc;
+            settings.aiScanIncludeHarem = includeHarem;
             settings.aiScanIncludeAffection = includeAffection;
             settings.aiScanIncludeScene = includeScene;
             settings.aiScanIncludeRelationship = includeRelationship;
@@ -19171,7 +19185,7 @@ function showAIScanConfigDialog(targetCount) {
             $('#horae-setting-vector-strip-tags').val(newStripTags);
             saveSettings();
             modal.remove();
-            resolve({ tokenLimit: Math.max(10000, val), includeNpc, includeAffection, includeScene, includeRelationship });
+            resolve({ tokenLimit: Math.max(10000, val), includeNpc, includeHarem, includeAffection, includeScene, includeRelationship });
         });
         modal.querySelector('#horae-ai-scan-cancel').addEventListener('click', () => {
             modal.remove();
